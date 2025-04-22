@@ -1,0 +1,894 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #A7E5FF 0%, #8fd3e8 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: relative;
+            background: linear-gradient(to bottom right, #F8E6A0, #fffbe6);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2e8b57;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+        }
+        .dashboard-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+        .admin-badge {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-size: 0.8em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .account-actions {
+            display: flex;
+            gap: 20px;
+        }
+        .account-actions a {
+            text-decoration: none;
+            color: #2e8b57;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .account-actions a:hover {
+            color: #1b5233;
+            transform: translateY(-2px);
+        }
+        .tabs {
+            display: flex;
+            background: linear-gradient(to right, #f8c144, #ffcd5d);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #333;
+        }
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .tab.active {
+            background: linear-gradient(to bottom, #2e8b57, #3aa76d);
+            color: white;
+            box-shadow: 0 2px 8px rgba(46,139,87,0.2);
+        }
+        .tab-content {
+            display: none;
+            padding: 25px;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .user-list, .request-list, .message-list-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2e8b57;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f8c144;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .promote-btn {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+        }
+        .demote-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        .approve-btn {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+        }
+        .reject-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            margin-left: 5px;
+        }
+        .reply-btn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .unread {
+            font-weight: bold;
+            background-color: rgba(248, 193, 68, 0.1);
+        }
+        .unread td:first-child:before {
+            content: "•";
+            color: #f8c144;
+            font-size: 1.5em;
+            margin-right: 5px;
+        }
+        .message-subject {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: linear-gradient(to bottom right, #F8E6A0, #fffbe6);
+            margin: 8% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 60%;
+            max-width: 700px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-30px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .close-modal {
+            color: #333;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .close-modal:hover {
+            color: #2e8b57;
+            transform: scale(1.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2e8b57;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        .form-group textarea {
+            height: 200px;
+            resize: vertical;
+        }
+        /* Added class for edited job indicators */
+        .edited-job-badge {
+            display: inline-block;
+            background-color: #f39c12;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .form-group input:focus, 
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #2e8b57;
+            box-shadow: 0 0 8px rgba(46, 139, 87, 0.3);
+            outline: none;
+        }
+        .btn-submit {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(46, 139, 87, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+        }
+        .compose-btn {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(46, 139, 87, 0.2);
+            transition: all 0.3s ease;
+        }
+        .compose-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+        }
+        #message-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        #message-details p {
+            margin: 8px 0;
+            color: #555;
+        }
+        #message-details strong {
+            color: #2e8b57;
+        }
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+                margin: 30px auto;
+            }
+            .top-bar {
+                flex-direction: column;
+                padding: 15px 10px;
+            }
+            .dashboard-title {
+                margin: 10px 0;
+            }
+            .account-actions {
+                margin-top: 10px;
+            }
+            .tabs {
+                overflow-x: auto;
+            }
+            .tab {
+                padding: 15px 15px;
+                white-space: nowrap;
+            }
+            th, td {
+                padding: 10px;
+            }
+            .action-btn {
+                margin-bottom: 5px;
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="logo">Leaf</div>
+        <div class="dashboard-title">Admin Dashboard <span class="admin-badge">Admin</span></div>
+        <div class="account-actions">
+            <a href="{% url 'dashboard' %}">User Dashboard</a>
+            <a href="{% url 'logout' %}">Sign Out</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="openTab(event, 'requests')">Request Management</div>
+        <div class="tab" onclick="openTab(event, 'job-listings')">Manage Job Listings</div>
+        <div class="tab" onclick="openTab(event, 'archived-jobs')">Archived Jobs</div>
+        <div class="tab" onclick="openTab(event, 'messages')">Messages</div>
+        <div class="tab" onclick="openTab(event, 'manage-users')">Manage Users</div>
+    </div>
+
+    <div id="requests" class="tab-content active">
+        <div class="request-list">
+            <h2>Request Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Request Name</th>
+                        <th>Job Number</th>
+                        <th>Submitted By</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr>
+                        <td>
+                            {{ request.request_name }}
+                            {% if request.is_edited_job %}
+                            <span class="edited-job-badge">Edited Job</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ request.job_number|default:"N/A" }}</td>
+                        <td>{{ request.requesting_user.user_name }}</td>
+                        <td>{{ request.request_description|truncatechars:50 }}</td>
+                        <td>{{ request.status|title }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                                {% if request.is_edited_job %}
+                                <!-- For edited jobs, use activate_job endpoint -->
+                                <form method="post" action="{% url 'activate_job' request.job_id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn approve-btn">Approve</button>
+                                </form>
+                                <button class="action-btn reject-btn" onclick="deactivateJob('{{ request.job_id }}')">Reject</button>
+                                {% else %}
+                                <!-- For new requests, use approve_request endpoint -->
+                                <form method="post" action="{% url 'approve_request' request.request_id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn approve-btn">Approve</button>
+                                </form>
+                                <button class="action-btn reject-btn" onclick="openRejectModal('{{ request.request_id }}', '{{ request.user_id }}', '{{ request.request_name }}')">Reject</button>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="job-listings" class="tab-content">
+        <div class="request-list">
+            <h2>Job Listings Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Job Number</th>
+                        <th>Posted By</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    {% if job.status == 'active' %}
+                    <tr>
+                        <td>{{ job.job_title }}</td>
+                        <td>{{ job.job_number|default:"N/A" }}</td>
+                        <td>{{ job.user_name|default:"Unknown" }}</td>
+                        <td>{{ job.status|title }}</td>
+                        <td>${{ job.price }}</td>
+                        <td>
+                            <button class="action-btn" onclick="viewJobDetails('{{ job.job_id }}')">View Details</button>
+                            <button class="action-btn reject-btn" onclick="deactivateJob('{{ job.job_id }}')">Deactivate</button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="archived-jobs" class="tab-content">
+        <div class="request-list">
+            <h2>Archived Job Listings</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Job Number</th>
+                        <th>Posted By</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    {% if job.status == 'inactive' %}
+                    <tr>
+                        <td>{{ job.job_title }}</td>
+                        <td>{{ job.job_number|default:"N/A" }}</td>
+                        <td>{{ job.user_name|default:"Unknown" }}</td>
+                        <td>{{ job.status|title }}</td>
+                        <td>${{ job.price }}</td>
+                        <td>
+                            <button class="action-btn" onclick="viewJobDetails('{{ job.job_id }}')">View Details</button>
+                            <button class="action-btn approve-btn" onclick="activateJob('{{ job.job_id }}')">Activate</button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="manage-users" class="tab-content">
+        <div class="user-list">
+            <h2>User Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Admin Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{% if user.is_admin %}Admin{% else %}User{% endif %}</td>
+                        <td>
+                            {% if user.is_admin %}
+                            <form method="post" action="{% url 'demote_user' user.user_id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn demote-btn">Demote to User</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'promote_user' user.user_id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn promote-btn">Promote to Admin</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for job details -->
+    <div id="admin-job-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAdminJobModal()">&times;</span>
+            <h2 id="admin-job-title">Job Details</h2>
+            <div id="admin-job-info">
+                <p><strong>Job Number:</strong> <span id="admin-job-number"></span></p>
+                <p><strong>Description:</strong> <span id="admin-job-description"></span></p>
+                <p><strong>Price:</strong> $<span id="admin-job-price"></span></p>
+                <p><strong>Posted By:</strong> <span id="admin-job-user"></span></p>
+                <p><strong>Location:</strong> <span id="admin-job-location"></span></p>
+                <p><strong>Start Time:</strong> <span id="admin-job-start-time"></span></p>
+                <p><strong>Duration:</strong> <span id="admin-job-duration"></span></p>
+                <p><strong>Required Tools:</strong> <span id="admin-job-tools"></span></p>
+                <p><strong>Status:</strong> <span id="admin-job-status"></span></p>
+                <p><strong>Created From Request:</strong> <span id="admin-job-request-id"></span></p>
+                {% if worker_assigned %}
+                <p><strong>Assigned Worker:</strong> <span id="admin-job-worker"></span></p>
+                {% endif %}
+            </div>
+            <div id="admin-job-actions">
+                <button id="admin-toggle-status-btn" class="btn-submit"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messages" class="tab-content">
+        <div class="message-list-container">
+            <h2>Message Management</h2>
+            <button class="compose-btn" id="compose-btn">Compose New Message</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages %}
+                    <tr class="{% if not message.is_read %}unread{% endif %}">
+                        <td>{{ message.sender_name }}</td>
+                        <td class="message-subject">{{ message.subject }}</td>
+                        <td>
+                            {% if message.timestamp_display %}
+                                {{ message.timestamp_display }}
+                            {% else %}
+                                {{ message.timestamp|date:"M d, Y" }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="action-btn reply-btn" onclick="viewMessage('{{ message.message_id }}')">View/Reply</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for viewing and replying to messages -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeMessageModal()">&times;</span>
+            <h2 id="message-title">Message Details</h2>
+            <div id="message-details">
+                <p><strong>From:</strong> <span id="message-sender"></span></p>
+                <p><strong>Subject:</strong> <span id="message-subject"></span></p>
+                <p><strong>Date:</strong> <span id="message-date"></span></p>
+                <p><strong>Message:</strong></p>
+                <div id="message-content" style="background-color: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px;"></div>
+            </div>
+            <form method="post" action="{% url 'send_message' %}" id="reply-form">
+                {% csrf_token %}
+                <input type="hidden" id="reply-to" name="reply_to" value="">
+                <input type="hidden" id="receiver" name="receiver" value="">
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Reply:</label>
+                    <textarea id="content" name="content" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Reply</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for composing new messages -->
+    <div id="compose-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeComposeModal()">&times;</span>
+            <h2>New Message</h2>
+            <form method="post" action="{% url 'send_message' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="new-receiver">To:</label>
+                    <select id="new-receiver" name="receiver" required>
+                        <option value="">Select Recipient</option>
+                        {% for user in users %}
+                            {% if not user.is_admin %}
+                                <option value="{{ user.user_id }}">{{ user.username }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="new-subject">Subject:</label>
+                    <input type="text" id="new-subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-content">Message:</label>
+                    <textarea id="new-content" name="content" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for rejecting requests -->
+    <div id="reject-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRejectModal()">&times;</span>
+            <h2>Reject Request</h2>
+            <form method="post" action="" id="reject-form">
+                {% csrf_token %}
+                <input type="hidden" id="reject-request-id" name="request_id" value="">
+                <input type="hidden" id="reject-user-id" name="user_id" value="">
+                <input type="hidden" id="reject-request-name" name="request_name" value="">
+                <div class="form-group">
+                    <label for="rejection-reason">Reason for Rejection:</label>
+                    <textarea id="rejection-reason" name="reason" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit reject-btn">Submit Rejection</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // Hide all tab content
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Remove "active" class from all tabs
+            var tablinks = document.getElementsByClassName("tab");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            // Show the current tab and add "active" class to the button that opened the tab
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // View message details and prepare reply
+        function viewMessage(messageId) {
+            // Make AJAX request to get message details
+            fetch(`/get_message/${messageId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("message-sender").textContent = data.message.sender_name;
+                        document.getElementById("message-subject").textContent = data.message.subject;
+                        document.getElementById("message-date").textContent = data.message.timestamp;
+                        document.getElementById("message-content").textContent = data.message.content;
+                        
+                        // Set up reply form
+                        document.getElementById("reply-to").value = messageId;
+                        document.getElementById("receiver").value = data.message.sender_id;
+                        document.getElementById("subject").value = "Re: " + data.message.subject;
+                        
+                        // Show the modal
+                        document.getElementById("message-modal").style.display = "block";
+                    } else {
+                        alert("Error loading message: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error loading message");
+                });
+        }
+
+        // Close message modal
+        function closeMessageModal() {
+            document.getElementById("message-modal").style.display = "none";
+        }
+
+        // Show compose modal
+        function showComposeModal() {
+            document.getElementById("compose-modal").style.display = "block";
+        }
+
+        // Close compose modal
+        function closeComposeModal() {
+            document.getElementById("compose-modal").style.display = "none";
+        }
+
+        // Show reject modal
+        function openRejectModal(requestId, userId, requestName) {
+            const rejectModal = document.getElementById("reject-modal");
+            const rejectForm = document.getElementById("reject-form");
+            // Set the action URL dynamically - assumes your reject URL is named 'reject_request' and takes request_id
+            rejectForm.action = `/reject_request/${requestId}/`;
+            document.getElementById("reject-request-id").value = requestId;
+            document.getElementById("reject-user-id").value = userId;
+            document.getElementById("reject-request-name").value = requestName;
+            rejectModal.style.display = "block";
+        }
+
+        // Close reject modal
+        function closeRejectModal() {
+            document.getElementById("reject-modal").style.display = "none";
+        }
+
+        // Close modals when clicking outside of them
+        window.onclick = function(event) {
+            const messageModal = document.getElementById("message-modal");
+            const composeModal = document.getElementById("compose-modal");
+            const rejectModal = document.getElementById("reject-modal");
+            const adminJobModal = document.getElementById("admin-job-details-modal");
+
+            if (event.target == messageModal) {
+                messageModal.style.display = "none";
+            }
+            
+            if (event.target == composeModal) {
+                composeModal.style.display = "none";
+            }
+            
+            if (event.target == rejectModal) {
+                rejectModal.style.display = "none";
+            }
+            
+            if (event.target == adminJobModal) {
+                adminJobModal.style.display = "none";
+            }
+        }
+        
+        // View job details in admin panel
+        function viewJobDetails(jobId) {
+            fetch(`/get_job_details/${jobId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const job = data.job;
+                        document.getElementById("admin-job-title").textContent = job.job_title;
+                        document.getElementById("admin-job-number").textContent = job.job_number || 'N/A';
+                        document.getElementById("admin-job-description").textContent = job.description;
+                        document.getElementById("admin-job-price").textContent = job.price;
+                        document.getElementById("admin-job-user").textContent = job.user_name || "Unknown";
+                        document.getElementById("admin-job-location").textContent = 
+                            `${job.address || ''}, ${job.city || ''}, ${job.state || ''}`;
+                        document.getElementById("admin-job-start-time").textContent = job.start_time || 'N/A';
+                        document.getElementById("admin-job-duration").textContent = job.duration || 'N/A';
+                        document.getElementById("admin-job-tools").textContent = job.tools || 'Not specified';
+                        document.getElementById("admin-job-status").textContent = job.status || 'Active';
+                        document.getElementById("admin-job-request-id").textContent = job.request_id || 'N/A';
+                        
+                        // Set up worker info if available
+                        if (job.worker_id && job.worker_name) {
+                            const workerElement = document.getElementById("admin-job-worker");
+                            if (workerElement) {
+                                workerElement.textContent = job.worker_name;
+                            }
+                        }
+                        
+                        // Set up action button
+                        const toggleBtn = document.getElementById("admin-toggle-status-btn");
+                        if (job.status === 'active') {
+                            toggleBtn.textContent = "Deactivate Job";
+                            toggleBtn.className = "btn-submit reject-btn";
+                            toggleBtn.onclick = function() { deactivateJob(job.job_id); };
+                        } else {
+                            toggleBtn.textContent = "Activate Job";
+                            toggleBtn.className = "btn-submit approve-btn";
+                            toggleBtn.onclick = function() { activateJob(job.job_id); };
+                        }
+                        
+                        // Show the modal
+                        document.getElementById("admin-job-details-modal").style.display = "block";
+                    } else {
+                        alert("Error loading job details: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error loading job details");
+                });
+        }
+        
+        // Close job details modal
+        function closeAdminJobModal() {
+            document.getElementById("admin-job-details-modal").style.display = "none";
+        }
+        
+        // Activate a job
+        function activateJob(jobId) {
+            if (confirm("Are you sure you want to activate this job?")) {
+                fetch(`/activate_job/${jobId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Job activated successfully");
+                        window.location.reload();
+                    } else {
+                        alert("Error activating job: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error activating job");
+                });
+            }
+        }
+        
+        // Deactivate a job
+        function deactivateJob(jobId) {
+            if (confirm("Are you sure you want to deactivate this job?")) {
+                fetch(`/deactivate_job/${jobId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Job deactivated successfully");
+                        window.location.reload();
+                    } else {
+                        alert("Error deactivating job: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error deactivating job");
+                });
+            }
+        }
+        
+        // Helper function to get CSRF token
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        // Event listeners
+        document.getElementById("compose-btn").addEventListener("click", showComposeModal);
+
+        // Close modals when clicking outside of them
+        window.onclick = function(event) {
+            const messageModal = document.getElementById("message-modal");
+            const composeModal = document.getElementById("compose-modal");
+            const rejectModal = document.getElementById("reject-modal");
+
+            if (event.target == messageModal) {
+                messageModal.style.display = "none";
+            }
+            
+            if (event.target == composeModal) {
+                composeModal.style.display = "none";
+            }
+            
+            if (event.target == rejectModal) {
+                rejectModal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

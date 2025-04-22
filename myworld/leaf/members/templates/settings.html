@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #A7E5FF 0%, #8fd3e8 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        h1, h2 { 
+            color: #2e8b57;
+            margin-top: 0;
+        }
+        h1 {
+            font-size: 28px;
+            border-bottom: 2px solid #f8c144;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            font-size: 22px;
+            margin-top: 30px;
+        }
+        .container { 
+            background: linear-gradient(to bottom right, #F8E6A0, #fffbe6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18);
+            max-width: 800px;
+            width: 100%;
+            margin: 20px auto;
+            position: relative;
+        }
+        .profile-section { 
+            display: flex;
+            align-items: flex-start;
+            gap: 25px;
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            flex-direction: column;
+        }
+        .profile-section form {
+            width: 100%;
+        }
+        .profile-section img { 
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .profile-section img:hover {
+            transform: scale(1.05);
+        }
+        label { 
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2e8b57;
+        }
+        input[type="file"] { 
+            margin-bottom: 15px;
+            display: block;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            background-color: white;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background: linear-gradient(to right, #267349, #2e8b57);
+        }
+        button { 
+            padding: 12px 20px;
+            cursor: pointer;
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(46,139,87,0.2);
+            transition: all 0.3s ease;
+        }
+        button:hover { 
+            background: linear-gradient(to right, #267349, #2e8b57);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(46,139,87,0.3);
+        }
+        a { 
+            display: inline-block;
+            margin-top: 20px;
+            color: #2e8b57;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        a:hover { 
+            color: #1b5233;
+            transform: translateX(3px);
+        }
+        hr { 
+            border: 0;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+            margin: 25px 0;
+        }
+        /* Basic message styling */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 25px 0;
+        }
+        .messages li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .messages li.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .messages li.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .messages li.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        .messages li.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        .dashboard-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .dashboard-link:before {
+            content: "←";
+            margin-right: 5px;
+            transition: transform 0.3s ease;
+        }
+        .dashboard-link:hover:before {
+            transform: translateX(-3px);
+        }
+        .change-password-link {
+            background: linear-gradient(to right, #f8c144, #ffcd5d);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .change-password-link:hover {
+            background: linear-gradient(to right, #f5b730, #f8c144);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="text"], 
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus, 
+        input[type="tel"]:focus,
+        select:focus {
+            border-color: #2e8b57;
+            box-shadow: 0 0 8px rgba(46, 139, 87, 0.3);
+            outline: none;
+        }
+        .contact-info {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 15px;
+                width: calc(100% - 30px);
+            }
+            .profile-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Settings</h1>
+
+        {# Display messages #}
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <h2>Profile Picture</h2>
+        <div class="profile-section">
+            <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Current Profile Picture">
+            <form action="{% url 'upload_profile_image' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="profile_image_input">Upload new picture:</label>
+                <input type="file" id="profile_image_input" name="profile_image" accept="image/*" required>
+                <button type="submit">Update Picture</button>
+            </form>
+        </div>
+
+        <h2>Contact Information</h2>
+        <div class="profile-section">
+            <div class="contact-info">
+                <p><strong>Current Phone:</strong> {{ user.phone_num|default:"Not provided" }}</p>
+                <p><strong>Current Address:</strong> 
+                    {% if user.address and user.city and user.state %}
+                        {{ user.address }}, {{ user.city }}, {{ user.state }} {{ user.zip_code|default:"" }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </p>
+            </div>
+            <form action="{% url 'update_contact_info' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="phone_num">Phone Number:</label>
+                    <input type="tel" id="phone_num" name="phone_num" value="{{ user.phone_num|default:'' }}" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address" value="{{ user.address|default:'' }}" placeholder="Enter address">
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" value="{{ user.city|default:'' }}" placeholder="Enter city">
+                </div>
+                <div class="form-group">
+                    <label for="state">State:</label>
+                    <select id="state" name="state">
+                        <option value="">Select State</option>
+                        {% with user_state=user.state|default:'' %}
+                        <option value="AL" {% if user_state == 'AL' %}selected{% endif %}>Alabama (AL)</option>
+                        <option value="AK" {% if user_state == 'AK' %}selected{% endif %}>Alaska (AK)</option>
+                        <option value="AZ" {% if user_state == 'AZ' %}selected{% endif %}>Arizona (AZ)</option>
+                        <option value="AR" {% if user_state == 'AR' %}selected{% endif %}>Arkansas (AR)</option>
+                        <option value="CA" {% if user_state == 'CA' %}selected{% endif %}>California (CA)</option>
+                        <option value="CO" {% if user_state == 'CO' %}selected{% endif %}>Colorado (CO)</option>
+                        <option value="CT" {% if user_state == 'CT' %}selected{% endif %}>Connecticut (CT)</option>
+                        <option value="DE" {% if user_state == 'DE' %}selected{% endif %}>Delaware (DE)</option>
+                        <option value="FL" {% if user_state == 'FL' %}selected{% endif %}>Florida (FL)</option>
+                        <option value="GA" {% if user_state == 'GA' %}selected{% endif %}>Georgia (GA)</option>
+                        <option value="HI" {% if user_state == 'HI' %}selected{% endif %}>Hawaii (HI)</option>
+                        <option value="ID" {% if user_state == 'ID' %}selected{% endif %}>Idaho (ID)</option>
+                        <option value="IL" {% if user_state == 'IL' %}selected{% endif %}>Illinois (IL)</option>
+                        <option value="IN" {% if user_state == 'IN' %}selected{% endif %}>Indiana (IN)</option>
+                        <option value="IA" {% if user_state == 'IA' %}selected{% endif %}>Iowa (IA)</option>
+                        <option value="KS" {% if user_state == 'KS' %}selected{% endif %}>Kansas (KS)</option>
+                        <option value="KY" {% if user_state == 'KY' %}selected{% endif %}>Kentucky (KY)</option>
+                        <option value="LA" {% if user_state == 'LA' %}selected{% endif %}>Louisiana (LA)</option>
+                        <option value="ME" {% if user_state == 'ME' %}selected{% endif %}>Maine (ME)</option>
+                        <option value="MD" {% if user_state == 'MD' %}selected{% endif %}>Maryland (MD)</option>
+                        <option value="MA" {% if user_state == 'MA' %}selected{% endif %}>Massachusetts (MA)</option>
+                        <option value="MI" {% if user_state == 'MI' %}selected{% endif %}>Michigan (MI)</option>
+                        <option value="MN" {% if user_state == 'MN' %}selected{% endif %}>Minnesota (MN)</option>
+                        <option value="MS" {% if user_state == 'MS' %}selected{% endif %}>Mississippi (MS)</option>
+                        <option value="MO" {% if user_state == 'MO' %}selected{% endif %}>Missouri (MO)</option>
+                        <option value="MT" {% if user_state == 'MT' %}selected{% endif %}>Montana (MT)</option>
+                        <option value="NE" {% if user_state == 'NE' %}selected{% endif %}>Nebraska (NE)</option>
+                        <option value="NV" {% if user_state == 'NV' %}selected{% endif %}>Nevada (NV)</option>
+                        <option value="NH" {% if user_state == 'NH' %}selected{% endif %}>New Hampshire (NH)</option>
+                        <option value="NJ" {% if user_state == 'NJ' %}selected{% endif %}>New Jersey (NJ)</option>
+                        <option value="NM" {% if user_state == 'NM' %}selected{% endif %}>New Mexico (NM)</option>
+                        <option value="NY" {% if user_state == 'NY' %}selected{% endif %}>New York (NY)</option>
+                        <option value="NC" {% if user_state == 'NC' %}selected{% endif %}>North Carolina (NC)</option>
+                        <option value="ND" {% if user_state == 'ND' %}selected{% endif %}>North Dakota (ND)</option>
+                        <option value="OH" {% if user_state == 'OH' %}selected{% endif %}>Ohio (OH)</option>
+                        <option value="OK" {% if user_state == 'OK' %}selected{% endif %}>Oklahoma (OK)</option>
+                        <option value="OR" {% if user_state == 'OR' %}selected{% endif %}>Oregon (OR)</option>
+                        <option value="PA" {% if user_state == 'PA' %}selected{% endif %}>Pennsylvania (PA)</option>
+                        <option value="RI" {% if user_state == 'RI' %}selected{% endif %}>Rhode Island (RI)</option>
+                        <option value="SC" {% if user_state == 'SC' %}selected{% endif %}>South Carolina (SC)</option>
+                        <option value="SD" {% if user_state == 'SD' %}selected{% endif %}>South Dakota (SD)</option>
+                        <option value="TN" {% if user_state == 'TN' %}selected{% endif %}>Tennessee (TN)</option>
+                        <option value="TX" {% if user_state == 'TX' %}selected{% endif %}>Texas (TX)</option>
+                        <option value="UT" {% if user_state == 'UT' %}selected{% endif %}>Utah (UT)</option>
+                        <option value="VT" {% if user_state == 'VT' %}selected{% endif %}>Vermont (VT)</option>
+                        <option value="VA" {% if user_state == 'VA' %}selected{% endif %}>Virginia (VA)</option>
+                        <option value="WA" {% if user_state == 'WA' %}selected{% endif %}>Washington (WA)</option>
+                        <option value="WV" {% if user_state == 'WV' %}selected{% endif %}>West Virginia (WV)</option>
+                        <option value="WI" {% if user_state == 'WI' %}selected{% endif %}>Wisconsin (WI)</option>
+                        <option value="WY" {% if user_state == 'WY' %}selected{% endif %}>Wyoming (WY)</option>
+                        {% endwith %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="unit_apt_num">Unit/Apt Number:</label>
+                    <input type="text" id="unit_apt_num" name="unit_apt_num" value="{{ user.unit_apt_num|default:'' }}" placeholder="Unit/Apt Number (optional)">
+                </div>
+                <div class="form-group">
+                    <label for="zip_code">Zip Code:</label>
+                    <input type="text" id="zip_code" name="zip_code" value="{{ user.zip_code|default:'' }}" placeholder="Zip Code">
+                </div>
+                <button type="submit">Update Contact Info</button>
+            </form>
+        </div>
+
+        <h2>Account</h2>
+        <a href="{% url 'change_password' %}" class="change-password-link">Change Password</a>
+
+        <hr>
+        <a href="{% url 'dashboard' %}" class="dashboard-link">Back to Dashboard</a>
+    </div>
+</body>
+</html>

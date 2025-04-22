@@ -1,0 +1,424 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Request</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #A7E5FF 0%, #8fd3e8 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #2e8b57;
+            margin-top: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .container {
+            width: 60%;
+            background: linear-gradient(to bottom right, #F8E6A0, #fffbe6);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px auto 50px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18);
+            position: relative;
+            border: none;
+        }
+        .header {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 25px;
+            color: #2e8b57;
+            border-bottom: 2px solid #f8c144;
+            padding-bottom: 10px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 22px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #555;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .close-btn:hover {
+            color: #2e8b57;
+            transform: scale(1.2);
+        }
+        textarea {
+            width: 98%;
+            height: 120px;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.9);
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        textarea:focus {
+            border-color: #2e8b57;
+            box-shadow: 0 0 8px rgba(46, 139, 87, 0.3);
+            outline: none;
+        }
+        input, select {
+            width: 30%;
+            padding: 12px;
+            margin: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #2e8b57;
+            box-shadow: 0 0 8px rgba(46, 139, 87, 0.3);
+            outline: none;
+        }
+        /* Special styles for date and time inputs */
+        input[type="date"], input[type="time"] {
+            width: 30%;
+            padding: 12px;
+            margin: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="time"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        /* Price input with $ sign */
+        .price-input-container {
+            position: relative;
+            display: inline-block;
+            width: 30%;
+        }
+        .price-input-container:before {
+            content: '$';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e8b57;
+            z-index: 5;
+        }
+        .price-input {
+            padding-left: 28px !important;
+            width: 100% !important;
+        }
+        .post-btn {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            width: auto;
+            min-width: 150px;
+            margin-top: 25px;
+            box-shadow: 0 4px 16px rgba(46, 139, 87, 0.2);
+            transition: all 0.3s ease;
+        }
+        .post-btn:hover {
+            background: linear-gradient(to right, #267349, #2e8b57);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(46, 139, 87, 0.3);
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            width: 60%;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .alert-info {
+            color: #31708f;
+            background-color: #d9edf7;
+            border-color: #bce8f1;
+        }
+        .required {
+            display: inline-block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2e8b57;
+        }
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .input-label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #2e8b57;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            gap: 10px;
+        }
+        .input-group label {
+            margin-right: 10px;
+            font-weight: 600;
+            color: #2e8b57;
+        }
+        .section-divider {
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        ::placeholder {
+            color: #999;
+            opacity: 0.8;
+        }
+        @media (max-width: 900px) {
+            .container {
+                width: 85%;
+                padding: 20px;
+            }
+            input, select, .price-input-container, input[type="date"], input[type="time"] {
+                width: 100%;
+                margin: 8px 0;
+            }
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .alert {
+                width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">New Request</h1>
+    
+    {% if messages %}
+    <div style="width: 60%; margin: 0 auto;">
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="container">
+        <a href="{% url 'dashboard' %}" class="close-btn">&#10006;</a>
+        <div class="header">Job Detail</div>
+        <form action="{% url 'new_request' %}" method="post" id="requestForm">
+            {% csrf_token %}
+                <!-- Add Job Title field -->
+                <label class="required">Job Title</label>
+                <input type="text" name="job_title" placeholder="Enter job title" required style="width: 98%;">
+                <br>
+                <label class="required">Job Description</label>
+                <textarea name="job_description" placeholder="Write here..." required></textarea>
+                <br>
+                <input type="text" name="address" placeholder="Address 1" required>
+                <input type="text" name="city" placeholder="City" required>
+                <select name="state" required>
+                    <option value="">Select State</option>
+                    <option>Alabama</option>
+                    <option>Alaska</option>
+                    <option>Arizona</option>
+                    <option>Arkansas</option>
+                    <option>California</option>
+                    <option>Colorado</option>
+                    <option>Connecticut</option>
+                    <option>Delaware</option>
+                    <option>Florida</option>
+                    <option>Georgia</option>
+                    <option>Hawaii</option>
+                    <option>Idaho</option>
+                    <option>Illinois</option>
+                    <option>Indiana</option>
+                    <option>Iowa</option>
+                    <option>Kansas</option>
+                    <option>Kentucky</option>
+                    <option>Louisiana</option>
+                    <option>Maine</option>
+                    <option>Maryland</option>
+                    <option>Massachusetts</option>
+                    <option>Michigan</option>
+                    <option>Minnesota</option>
+                    <option>Mississippi</option>
+                    <option>Missouri</option>
+                    <option>Montana</option>
+                    <option>Nebraska</option>
+                    <option>Nevada</option>
+                    <option>New Hampshire</option>
+                    <option>New Jersey</option>
+                    <option>New Mexico</option>
+                    <option>New York</option>
+                    <option>North Carolina</option>
+                    <option>North Dakota</option>
+                    <option>Ohio</option>
+                    <option>Oklahoma</option>
+                    <option>Oregon</option>
+                    <option>Pennsylvania</option>
+                    <option>Rhode Island</option>
+                    <option>South Carolina</option>
+                    <option>South Dakota</option>
+                    <option>Tennessee</option>
+                    <option>Texas</option>
+                    <option>Utah</option>
+                    <option>Vermont</option>
+                    <option>Virginia</option>
+                    <option>Washington</option>
+                    <option>West Virginia</option>
+                    <option>Wisconsin</option>
+                    <option>Wyoming</option>
+                </select>
+                <br>
+                <input type="text" name="unit_apt_num" placeholder="Unit/Apt Number">
+                <input type="text" name="zip_code" placeholder="Zip Code" required>
+                <select name="tools" required>
+                    <option value="">Tool / No Tool</option>
+                    <option>Tool</option>
+                    <option>No Tool</option>
+                </select>
+                <br>
+                <!-- Replace single start_time field with separate date and time inputs -->
+                <div class="input-group">
+                    <input type="date" name="start_date" required>
+                    <input type="time" name="start_time" required>
+                </div>
+                <select name="duration" required>
+                    <option value="">Select Duration</option>
+                    <option>30 mins</option>
+                    <option>1 hour</option>
+                    <option>1 hour 30 mins</option>
+                    <option>2 hours</option>
+                    <option>2 hours 30 mins</option>
+                    <option>3 hours</option>
+                    <option>3 hours 30 mins</option>
+                    <option>4 hours</option>
+                </select>
+                <!-- Modified price input with $ sign -->
+                <div class="price-input-container">
+                    <input type="number" name="job_price" class="price-input" placeholder="Job Price" step="0.01" min="0" required>
+                </div>
+                <br>
+                <select name="personal_business" required>
+                    <option value="">Personal / Business</option>
+                    <option>Personal</option>
+                    <option>Business</option>
+                </select>
+                <select name="sizes" required>
+                    <option value="">Select Size</option>
+                    <option>Small</option>
+                    <option>Medium</option>
+                    <option>Large</option>
+                </select>
+                <select name="amt_people" required>
+                    <option value="">Number of People</option>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+                <br>
+                <button type="submit" class="post-btn">Post</button>
+        </form>
+    </div>
+
+    <script>
+        // Close button functionality
+        document.querySelector('.close-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = this.getAttribute('href');
+        });
+
+        // Set default date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            // Format today's date as YYYY-MM-DD for the date input
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            
+            // Set the default date
+            document.querySelector('input[name="start_date"]').value = formattedDate;
+            
+            // Set a default time (optional)
+            const hours = String(today.getHours()).padStart(2, '0');
+            const minutes = String(Math.ceil(today.getMinutes() / 15) * 15).padStart(2, '0');
+            document.querySelector('input[name="start_time"]').value = `${hours}:${minutes}`;
+        });
+
+        // Form validation
+        document.getElementById('requestForm').addEventListener('submit', function(e) {
+            let requiredFields = this.querySelectorAll('[required]');
+            let valid = true;
+            
+            requiredFields.forEach(function(field) {
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'red';
+                    valid = false;
+                } else {
+                    field.style.borderColor = '#ccc';
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Combine date and time fields into the original start_time format before submission
+            const startDate = document.querySelector('input[name="start_date"]').value;
+            const startTime = document.querySelector('input[name="start_time"]').value;
+            
+            // Create hidden field with combined date and time
+            const hiddenField = document.createElement('input');
+            hiddenField.type = 'hidden';
+            hiddenField.name = 'start_time';
+            hiddenField.value = startDate + ' ' + startTime;
+            this.appendChild(hiddenField);
+        });
+    </script>
+</body>
+</html>
