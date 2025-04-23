@@ -63,7 +63,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin-right: 20px;
+            margin-right: 10px;
         }
         #profile-img-display {
             width: 60px;
@@ -78,9 +78,6 @@
         }
         #profile-img-display:hover {
             transform: scale(1.05);
-        }
-        .ratings {
-            text-align: center;
         }
         .account-actions {
             display: flex;
@@ -370,12 +367,6 @@
                 <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" id="profile-img-display">
                 {# Display the actual username #}
                 <div>{{ user.username }}</div>
-            </div>
-            <div>
-                <div class="ratings">
-                    <div style="color: gold;">★★★★★</div>
-                    <div style="color: black;">★★★★☆</div>
-                </div>
             </div>
             <div class="account-actions">
                 {% if request.session.is_admin %}
