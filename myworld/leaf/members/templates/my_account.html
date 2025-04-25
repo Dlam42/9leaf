@@ -79,6 +79,9 @@
         #profile-img-display:hover {
             transform: scale(1.05);
         }
+        .ratings {
+            text-align: center;
+        }
         .account-actions {
             display: flex;
             flex-direction: column;
@@ -301,376 +304,388 @@
 </head>
 <body>
     <div class="top-bar">
-        <div class="logo">Leaf</div>
-        <div class="page-title">My Account</div>
-        <div class="profile-box">
-            <div class="profile-info">
-                <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" id="profile-img-display">
-                <div>{{ user.username }}</div>
-            </div>
-            <div class="account-actions">
-                {% if request.session.is_admin %}
-                <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
-                {% endif %}
-                <a href="{% url 'dashboard' %}">Dashboard</a>
-                <a href="{% url 'settings' %}">Settings</a>
-                <a href="{% url 'logout' %}">Sign Out</a>
+            {% if site_settings.logo_url %}
+                <div class="logo">
+                    <img src="{{ site_settings.logo_url }}" alt="Leaf Logo" style="max-width: 150px; max-height: 60px;">
+                </div>
+            {% else %}
+                <div class="logo">Leaf</div>
+            {% endif %}
+            <div class="page-title">My Account</div>
+            <div class="profile-box">
+                <div class="profile-info">
+                    <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" id="profile-img-display">
+                    <div>{{ user.username }}</div>
+                </div>
+                <div>
+                    <div class="ratings">
+                        <div style="color: gold;">★★★★★</div>
+                        <div style="color: black;">★★★★☆</div>
+                    </div>
+                </div>
+                <div class="account-actions">
+                    {% if request.session.is_admin %}
+                    <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                    {% endif %}
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                    <a href="{% url 'settings' %}">Settings</a>
+                    <a href="{% url 'logout' %}">Sign Out</a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="content">
-        {% if messages %}
-        <div class="section-box" style="padding: 15px; margin-bottom: 20px;">
-            <ul style="margin: 0; padding: 0; list-style: none;">
-                {% for message in messages %}
-                <li {% if message.tags %}class="{{ message.tags }}"{% endif %} style="padding: 8px; margin-bottom: 5px; border-radius: 5px; background-color: #d9edf7;">
-                    {{ message }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+        <div class="content">
+            {% if messages %}
+            <div class="section-box" style="padding: 15px; margin-bottom: 20px;">
+                <ul style="margin: 0; padding: 0; list-style: none;">
+                    {% for message in messages %}
+                    <li {% if message.tags %}class="{{ message.tags }}"{% endif %} style="padding: 8px; margin-bottom: 5px; border-radius: 5px; background-color: #d9edf7;">
+                        {{ message }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
-        <div class="section-box">
-            <h2>Profile Information</h2>
-            <div class="profile-section">
-                <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" class="profile-image-large">
-                <div class="profile-data">
-                    <h3>{{ user.username }}</h3>
-                    <p><strong>Email:</strong> {{ user.email }}</p>
-                    <p><strong>Phone:</strong> {{ user.phone_num|default:user.phone_number|default:"Not provided" }}</p>
-                    <p><strong>Address:</strong> 
-                        {% if user.address and user.city and user.state %}
-                            {{ user.address }}, {{ user.city }}, {{ user.state }} {{ user.zip_code }}
+            <div class="section-box">
+                <h2>Profile Information</h2>
+                <div class="profile-section">
+                    <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" class="profile-image-large">
+                    <div class="profile-data">
+                        <h3>{{ user.username }}</h3>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Phone:</strong> {{ user.phone_num|default:user.phone_number|default:"Not provided" }}</p>
+                        <p><strong>Address:</strong> 
+                            {% if user.address and user.city and user.state %}
+                                {{ user.address }}, {{ user.city }}, {{ user.state }} {{ user.zip_code }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+                        </p>
+                        <p><strong>Account Status:</strong> 
+                            {% if user.is_admin %}
+                                Administrator
+                            {% else %}
+                                Regular User
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h2>Job Activity</h2>
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="my-requests">My Service Requests</button>
+                        <button class="tab-button" data-tab="my-jobs">My Job Listings</button>
+                        <button class="tab-button" data-tab="assigned-jobs">Jobs I'm Working On</button>
+                    </div>
+
+                    <!-- Tab 1: My Requests -->
+                    <div id="my-requests" class="tab-content active">
+                        {% if requests or pending_jobs %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Request Name</th>
+                                        <th>Job Number</th>
+                                        <th>Description</th>
+                                        <th>Date Submitted</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request_item in requests %}
+                                        {% if request_item.status == "pending" %}
+                                            <tr class="pending-request">
+                                                <td>{{ request_item.request_name }}</td>
+                                                <td>{{ request_item.job_number|default:"N/A" }}</td>
+                                                <td>{{ request_item.request_description|truncatechars:50 }}</td>
+                                                <td>{{ request_item.date_created|default:"Unknown" }}</td>
+                                                <td>
+                                                    <span class="status-label status-{{ request_item.status|lower }}">
+                                                        {{ request_item.status|title }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    <!-- Also display edited jobs that are in pending status -->
+                                    {% for job in posted_jobs %}
+                                        {% if job.status == "pending" %}
+                                            <tr class="pending-request">
+                                                <td>{{ job.job_title }} <small>(Edited)</small></td>
+                                                <td>{{ job.job_number|default:"N/A" }}</td>
+                                                <td>{{ job.description|truncatechars:50 }}</td>
+                                                <td>{{ job.edit_timestamp|default:"Unknown" }}</td>
+                                                <td>
+                                                    <span class="status-label status-{{ job.status|lower }}">
+                                                        {{ job.status|title }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    <!-- Add this script to check if any pending requests were displayed -->
+                                    <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const pendingRequests = document.querySelectorAll('.pending-request');
+                                        if (pendingRequests.length === 0) {
+                                            const tbody = document.querySelector('#my-requests tbody');
+                                            const emptyRow = document.createElement('tr');
+                                            emptyRow.innerHTML = `
+                                                <td colspan="5">
+                                                    <div class="no-data-message">
+                                                        <p>You don't have any pending service requests.</p>
+                                                        <a href="{% url 'new_request' %}" class="dashboard-link">Submit a New Request</a>
+                                                    </div>
+                                                </td>
+                                            `;
+                                            tbody.appendChild(emptyRow);
+                                        }
+                                    });
+                                    </script>
+                                </tbody>
+                            </table>
                         {% else %}
-                            Not provided
+                            <div class="no-data-message">
+                                <p>You haven't submitted any service requests yet.</p>
+                                <a href="{% url 'new_request' %}" class="dashboard-link">Submit a New Request</a>
+                            </div>
                         {% endif %}
-                    </p>
-                    <p><strong>Account Status:</strong> 
-                        {% if user.is_admin %}
-                            Administrator
+                    </div>
+
+                    <!-- Tab 2: My Job Listings -->
+                    <div id="my-jobs" class="tab-content">
+                        {% if posted_jobs %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Job Title</th>
+                                        <th>Job Number</th>
+                                        <th>Price</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in posted_jobs %}
+                                    <tr>
+                                        <td>{{ job.job_title }}</td>
+                                        <td>{{ job.job_number|default:"N/A" }}</td>
+                                        <td>${{ job.price }}</td>
+                                        <td>
+                                            {% if job.city and job.state %}
+                                                {{ job.city }}, {{ job.state }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="status-label status-{{ job.status|lower }}">
+                                                {{ job.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'job_details' job_id=job.job_id %}" class="action-btn" style="text-decoration: none; display: inline-block; margin-bottom: 5px;">
+                                                View Details
+                                            </a>
+                                            {% if job.status == 'active' %}
+                                                <button onclick="markJobAsDone('{{ job.job_id }}')" class="action-btn">
+                                                    Mark as Done
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         {% else %}
-                            Regular User
+                            <div class="no-data-message">
+                                <p>You don't have any job listings yet.</p>
+                                <p>When your service requests are approved by an admin, they will become job listings.</p>
+                            </div>
                         {% endif %}
-                    </p>
+                    </div>
+
+                    <!-- Tab 3: Assigned Jobs -->
+                    <div id="assigned-jobs" class="tab-content">
+                        {% if assigned_jobs %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Job Title</th>
+                                        <th>Job Number</th>
+                                        <th>Client</th>
+                                        <th>Price</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in assigned_jobs %}
+                                    <tr>
+                                        <td>{{ job.job_title }}</td>
+                                        <td>{{ job.job_number|default:"N/A" }}</td>
+                                        <td>{{ job.client_name|default:"Unknown" }}</td>
+                                        <td>${{ job.price }}</td>
+                                        <td>
+                                            {% if job.city and job.state %}
+                                                {{ job.city }}, {{ job.state }}
+                                            {% else %}
+                                                Not specified
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="status-label status-{{ job.status|lower }}">
+                                                {{ job.status|title }}
+                                            </span>
+                                            {% if job.status == "done" %}
+                                            <div style="margin-top: 5px; font-size: 12px; color: #3c763d;">
+                                                Completed by the job owner
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if job.status == 'active' %}
+                                                <button onclick="cancelAssignedJob('{{ job.job_id }}')" class="action-btn" style="background: linear-gradient(to right, #e74c3c, #c0392b);">
+                                                    Cancel Job
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="no-data-message">
+                                <p>You haven't been assigned to any jobs yet.</p>
+                                <a href="{% url 'dashboard' %}" class="dashboard-link">Browse Available Jobs</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+
+            <a href="{% url 'dashboard' %}" class="dashboard-link">Return to Dashboard</a>
         </div>
 
-        <div class="section-box">
-            <h2>Job Activity</h2>
-            <div class="tab-container">
-                <div class="tab-buttons">
-                    <button class="tab-button active" data-tab="my-requests">My Service Requests</button>
-                    <button class="tab-button" data-tab="my-jobs">My Job Listings</button>
-                    <button class="tab-button" data-tab="assigned-jobs">Jobs I'm Working On</button>
-                </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const tabButtonsContainer = document.querySelector('.tab-buttons');
 
-                <!-- Tab 1: My Requests -->
-                <div id="my-requests" class="tab-content active">
-                    {% if requests or pending_jobs %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Request Name</th>
-                                    <th>Job Number</th>
-                                    <th>Description</th>
-                                    <th>Date Submitted</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for request_item in requests %}
-                                    {% if request_item.status == "pending" %}
-                                        <tr class="pending-request">
-                                            <td>{{ request_item.request_name }}</td>
-                                            <td>{{ request_item.job_number|default:"N/A" }}</td>
-                                            <td>{{ request_item.request_description|truncatechars:50 }}</td>
-                                            <td>{{ request_item.date_created|default:"Unknown" }}</td>
-                                            <td>
-                                                <span class="status-label status-{{ request_item.status|lower }}">
-                                                    {{ request_item.status|title }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                <!-- Also display edited jobs that are in pending status -->
-                                {% for job in posted_jobs %}
-                                    {% if job.status == "pending" %}
-                                        <tr class="pending-request">
-                                            <td>{{ job.job_title }} <small>(Edited)</small></td>
-                                            <td>{{ job.job_number|default:"N/A" }}</td>
-                                            <td>{{ job.description|truncatechars:50 }}</td>
-                                            <td>{{ job.edit_timestamp|default:"Unknown" }}</td>
-                                            <td>
-                                                <span class="status-label status-{{ job.status|lower }}">
-                                                    {{ job.status|title }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                <!-- Add this script to check if any pending requests were displayed -->
-                                <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    const pendingRequests = document.querySelectorAll('.pending-request');
-                                    if (pendingRequests.length === 0) {
-                                        const tbody = document.querySelector('#my-requests tbody');
-                                        const emptyRow = document.createElement('tr');
-                                        emptyRow.innerHTML = `
-                                            <td colspan="5">
-                                                <div class="no-data-message">
-                                                    <p>You don't have any pending service requests.</p>
-                                                    <a href="{% url 'new_request' %}" class="dashboard-link">Submit a New Request</a>
-                                                </div>
-                                            </td>
-                                        `;
-                                        tbody.appendChild(emptyRow);
-                                    }
-                                });
-                                </script>
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="no-data-message">
-                            <p>You haven't submitted any service requests yet.</p>
-                            <a href="{% url 'new_request' %}" class="dashboard-link">Submit a New Request</a>
-                        </div>
-                    {% endif %}
-                </div>
+                if (tabButtonsContainer) {
+                    tabButtonsContainer.addEventListener('click', function(event) {
+                        const clickedButton = event.target.closest('.tab-button');
 
-                <!-- Tab 2: My Job Listings -->
-                <div id="my-jobs" class="tab-content">
-                    {% if posted_jobs %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Job Title</th>
-                                    <th>Job Number</th>
-                                    <th>Price</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for job in posted_jobs %}
-                                <tr>
-                                    <td>{{ job.job_title }}</td>
-                                    <td>{{ job.job_number|default:"N/A" }}</td>
-                                    <td>${{ job.price }}</td>
-                                    <td>
-                                        {% if job.city and job.state %}
-                                            {{ job.city }}, {{ job.state }}
-                                        {% else %}
-                                            Not specified
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="status-label status-{{ job.status|lower }}">
-                                            {{ job.status|title }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'job_details' job_id=job.job_id %}" class="action-btn" style="text-decoration: none; display: inline-block; margin-bottom: 5px;">
-                                            View Details
-                                        </a>
-                                        {% if job.status == 'active' %}
-                                            <button onclick="markJobAsDone('{{ job.job_id }}')" class="action-btn">
-                                                Mark as Done
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="no-data-message">
-                            <p>You don't have any job listings yet.</p>
-                            <p>When your service requests are approved by an admin, they will become job listings.</p>
-                        </div>
-                    {% endif %}
-                </div>
+                        if (!clickedButton) {
+                            return; // Click wasn't on a button
+                        }
 
-                <!-- Tab 3: Assigned Jobs -->
-                <div id="assigned-jobs" class="tab-content">
-                    {% if assigned_jobs %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Job Title</th>
-                                    <th>Job Number</th>
-                                    <th>Client</th>
-                                    <th>Price</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for job in assigned_jobs %}
-                                <tr>
-                                    <td>{{ job.job_title }}</td>
-                                    <td>{{ job.job_number|default:"N/A" }}</td>
-                                    <td>{{ job.client_name|default:"Unknown" }}</td>
-                                    <td>${{ job.price }}</td>
-                                    <td>
-                                        {% if job.city and job.state %}
-                                            {{ job.city }}, {{ job.state }}
-                                        {% else %}
-                                            Not specified
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="status-label status-{{ job.status|lower }}">
-                                            {{ job.status|title }}
-                                        </span>
-                                        {% if job.status == "done" %}
-                                        <div style="margin-top: 5px; font-size: 12px; color: #3c763d;">
-                                            Completed by the job owner
-                                        </div>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if job.status == 'active' %}
-                                            <button onclick="cancelAssignedJob('{{ job.job_id }}')" class="action-btn" style="background: linear-gradient(to right, #e74c3c, #c0392b);">
-                                                Cancel Job
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="no-data-message">
-                            <p>You haven't been assigned to any jobs yet.</p>
-                            <a href="{% url 'dashboard' %}" class="dashboard-link">Browse Available Jobs</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+                        const tabId = clickedButton.dataset.tab;
+                        if (!tabId) {
+                            console.error('Button is missing data-tab attribute:', clickedButton);
+                            return;
+                        }
 
-        <a href="{% url 'dashboard' %}" class="dashboard-link">Return to Dashboard</a>
-    </div>
+                        // Hide all tab contents
+                        document.querySelectorAll('.tab-content').forEach(function(tabContent) {
+                            tabContent.classList.remove('active');
+                        });
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabButtonsContainer = document.querySelector('.tab-buttons');
+                        // Remove active class from all tab buttons
+                        document.querySelectorAll('.tab-button').forEach(function(tabButton) {
+                            tabButton.classList.remove('active');
+                        });
 
-            if (tabButtonsContainer) {
-                tabButtonsContainer.addEventListener('click', function(event) {
-                    const clickedButton = event.target.closest('.tab-button');
+                        // Show the selected tab content
+                        const targetTabContent = document.getElementById(tabId);
+                        if (targetTabContent) {
+                            targetTabContent.classList.add('active');
+                        } else {
+                            console.error('Target tab content not found for ID:', tabId);
+                        }
 
-                    if (!clickedButton) {
-                        return; // Click wasn't on a button
-                    }
-
-                    const tabId = clickedButton.dataset.tab;
-                    if (!tabId) {
-                        console.error('Button is missing data-tab attribute:', clickedButton);
-                        return;
-                    }
-
-                    // Hide all tab contents
-                    document.querySelectorAll('.tab-content').forEach(function(tabContent) {
-                        tabContent.classList.remove('active');
+                        // Make the clicked button active
+                        clickedButton.classList.add('active');
                     });
+                }
+            });
 
-                    // Remove active class from all tab buttons
-                    document.querySelectorAll('.tab-button').forEach(function(tabButton) {
-                        tabButton.classList.remove('active');
+            function markJobAsDone(jobId) {
+                if (confirm("Are you sure you want to mark this job as done?")) {
+                    fetch(`/mark_job_done/${jobId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Update the UI to show the job is now done
+                            const jobRow = document.querySelector(`button[onclick="markJobAsDone('${jobId}')"]`).closest('tr');
+                            
+                            // Update status cell
+                            const statusCell = jobRow.querySelector('td:nth-child(4)');
+                            statusCell.innerHTML = '<span class="status-label status-done">Done</span>';
+                            
+                            // Remove the Mark as Done button
+                            const actionCell = jobRow.querySelector('td:nth-child(5)');
+                            actionCell.innerHTML = '';
+                            
+                            alert("Job has been marked as done successfully!");
+                        } else {
+                            alert("Error: " + (data.error || "Could not mark job as done"));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error marking job as done:', error);
+                        alert("An error occurred while marking the job as done. Please try again.");
                     });
-
-                    // Show the selected tab content
-                    const targetTabContent = document.getElementById(tabId);
-                    if (targetTabContent) {
-                        targetTabContent.classList.add('active');
-                    } else {
-                        console.error('Target tab content not found for ID:', tabId);
-                    }
-
-                    // Make the clicked button active
-                    clickedButton.classList.add('active');
-                });
+                }
             }
-        });
 
-        function markJobAsDone(jobId) {
-            if (confirm("Are you sure you want to mark this job as done?")) {
-                fetch(`/mark_job_done/${jobId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Update the UI to show the job is now done
-                        const jobRow = document.querySelector(`button[onclick="markJobAsDone('${jobId}')"]`).closest('tr');
-                        
-                        // Update status cell
-                        const statusCell = jobRow.querySelector('td:nth-child(4)');
-                        statusCell.innerHTML = '<span class="status-label status-done">Done</span>';
-                        
-                        // Remove the Mark as Done button
-                        const actionCell = jobRow.querySelector('td:nth-child(5)');
-                        actionCell.innerHTML = '';
-                        
-                        alert("Job has been marked as done successfully!");
-                    } else {
-                        alert("Error: " + (data.error || "Could not mark job as done"));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error marking job as done:', error);
-                    alert("An error occurred while marking the job as done. Please try again.");
-                });
+            function cancelAssignedJob(jobId) {
+                if (confirm("Are you sure you want to cancel this job?")) {
+                    fetch(`/cancel_assigned_job/${jobId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert("Job has been canceled successfully!");
+                            location.reload();
+                        } else {
+                            alert("Error: " + (data.error || "Could not cancel job"));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error canceling job:', error);
+                        alert("An error occurred while canceling the job. Please try again.");
+                    });
+                }
             }
-        }
-
-        function cancelAssignedJob(jobId) {
-            if (confirm("Are you sure you want to cancel this job?")) {
-                fetch(`/cancel_assigned_job/${jobId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert("Job has been canceled successfully!");
-                        location.reload();
-                    } else {
-                        alert("Error: " + (data.error || "Could not cancel job"));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error canceling job:', error);
-                    alert("An error occurred while canceling the job. Please try again.");
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>

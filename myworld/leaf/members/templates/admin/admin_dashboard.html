@@ -333,7 +333,13 @@
 </head>
 <body>
     <div class="top-bar">
-        <div class="logo">Leaf</div>
+        {% if site_settings.logo_url %}
+            <div class="logo">
+                <img src="{{ site_settings.logo_url }}" alt="Leaf Logo" style="max-width: 150px; max-height: 60px;">
+            </div>
+        {% else %}
+            <div class="logo">Leaf</div>
+        {% endif %}
         <div class="dashboard-title">Admin Dashboard <span class="admin-badge">Admin</span></div>
         <div class="account-actions">
             <a href="{% url 'dashboard' %}">User Dashboard</a>
@@ -347,6 +353,7 @@
         <div class="tab" onclick="openTab(event, 'archived-jobs')">Archived Jobs</div>
         <div class="tab" onclick="openTab(event, 'messages')">Messages</div>
         <div class="tab" onclick="openTab(event, 'manage-users')">Manage Users</div>
+        <div class="tab" onclick="openTab(event, 'site-settings')">Site Settings</div>
     </div>
 
     <div id="requests" class="tab-content active">
@@ -568,6 +575,41 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="site-settings" class="tab-content">
+        <div class="settings-container" style="background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 25px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);">
+            <h2>Site Settings</h2>
+            
+            <div class="settings-section">
+                <h3>Logo Management</h3>
+                <div class="current-logo" style="margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 10px; text-align: center;">
+                    <h4>Current Logo</h4>
+                    {% if site_settings.logo_url %}
+                    <img src="{{ site_settings.logo_url }}" alt="Site Logo" style="max-width: 200px; max-height: 100px; margin: 10px 0;">
+                    {% else %}
+                    <div style="font-style: italic; color: #888; margin: 20px 0;">Text logo is currently being used</div>
+                    {% endif %}
+                </div>
+                
+                <form method="post" action="{% url 'upload_logo' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="logo-file">Upload New Logo:</label>
+                        <input type="file" id="logo-file" name="logo" accept="image/*" required style="border: none; padding: 10px 0;">
+                        <p style="font-size: 0.9em; color: #666; margin-top: 5px;">Recommended size: 200px x 100px. Max file size: 2MB. Supported formats: PNG, JPG, SVG</p>
+                    </div>
+                    <button type="submit" class="btn-submit">Upload Logo</button>
+                </form>
+                
+                {% if site_settings.logo_url %}
+                <form method="post" action="{% url 'reset_logo' %}" style="margin-top: 20px;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-submit reject-btn">Reset to Text Logo</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </div>
 

@@ -7,7 +7,18 @@ from leaf.firebase_config import db
 # from django.template import loader # loader.get_template not used if using render shortcut
 
 def members(request):
-    return render(request, "members_page.html")
+    # Get site settings for logo
+    site_settings = {}
+    try:
+        site_settings_ref = db.collection('site_settings').document('general').get()
+        if site_settings_ref.exists:
+            site_settings = site_settings_ref.to_dict()
+    except Exception as e:
+        print(f"Error retrieving site settings: {e}")
+        
+    return render(request, "members_page.html", {
+        'site_settings': site_settings
+    })
 
 def app(request):
     # Redirect to dashboard which has all the functionality
@@ -50,6 +61,15 @@ def my_account(request):
             return redirect('login_page')
             
         user_data = user_doc.to_dict()
+        
+        # Get site settings for logo
+        site_settings = {}
+        try:
+            site_settings_ref = db.collection('site_settings').document('general').get()
+            if site_settings_ref.exists:
+                site_settings = site_settings_ref.to_dict()
+        except Exception as e:
+            print(f"Error retrieving site settings: {e}")
         
         # Ensure phone_number is available, using phone_num if it exists
         if 'phone_num' in user_data and 'phone_number' not in user_data:
@@ -149,7 +169,8 @@ def my_account(request):
             'user': user_data,
             'posted_jobs': posted_jobs,
             'requests': requests_data,
-            'assigned_jobs': assigned_jobs
+            'assigned_jobs': assigned_jobs,
+            'site_settings': site_settings  # Add site_settings to the context
         })
         
     except Exception as e:

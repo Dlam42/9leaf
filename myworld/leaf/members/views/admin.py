@@ -1,9 +1,11 @@
 # Admin specific views
 import traceback
+import os
+import uuid
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import JsonResponse
-from firebase_admin import firestore
+from firebase_admin import firestore, storage
 from datetime import datetime, timezone, timedelta
 
 from members.custom_wrappers import admin_required # Import the decorator
@@ -20,6 +22,12 @@ def admin_dashboard(request):
             user_data = user_doc.to_dict()
             user_data['user_id'] = user_doc.id  # Add the document ID as user_id
             users.append(user_data)
+        
+        # Get site settings (for logo management)
+        site_settings = {}
+        site_settings_ref = db.collection('site_settings').document('general').get()
+        if site_settings_ref.exists:
+            site_settings = site_settings_ref.to_dict()
         
         # Get pending requests - only fetch pending status requests
         requests_ref = db.collection('requests').where(filter=firestore.FieldFilter('status', '==', 'pending')).stream()
@@ -240,7 +248,8 @@ def admin_dashboard(request):
             'jobs': all_jobs,
             'messages': admin_messages,
              # Pass admin user info if needed by template
-            'admin_user': {'user_id': admin_user_id, 'username': request.session.get('username')}
+            'admin_user': {'user_id': admin_user_id, 'username': request.session.get('username')},
+            'site_settings': site_settings  # Pass site settings to template
         }
         
         return render(request, 'admin/admin_dashboard.html', context)
@@ -595,3 +604,88 @@ def send_system_message(sender_id, receiver_id, subject, content):
         print(f"Warning: Could not fetch sender/receiver names for system message: {name_fetch_e}")
     
     db.collection('messages').add(message_data) # Use add() to auto-generate ID
+
+@admin_required
+def upload_logo(request):
+    """Upload a custom logo for the site and store it in Firebase Storage"""
+    if request.method == 'POST':
+        try:
+            logo_file = request.FILES.get('logo')
+            
+            if not logo_file:
+                messages.error(request, "No logo file was uploaded.")
+                return redirect('admin_dashboard')
+                
+            # Check file size (2MB limit)
+            if logo_file.size > 2 * 1024 * 1024:
+                messages.error(request, "Logo file size must be less than 2MB.")
+                return redirect('admin_dashboard')
+                
+            # Process the logo file
+            try:
+                # Get the storage bucket
+                bucket = storage.bucket()
+                
+                # Create a unique filename
+                file_extension = os.path.splitext(logo_file.name)[1]
+                blob_name = f"site_assets/logo/{uuid.uuid4()}{file_extension}"
+                
+                # Create a blob and upload the file
+                blob = bucket.blob(blob_name)
+                blob.upload_from_file(logo_file, content_type=logo_file.content_type)
+                
+                # Make the blob publicly accessible
+                blob.make_public()
+                logo_url = blob.public_url
+                
+                # Store the logo URL in Firestore site_settings collection
+                site_settings_ref = db.collection('site_settings').document('general')
+                
+                # Check if document exists, if not create it
+                doc = site_settings_ref.get()
+                if doc.exists:
+                    site_settings_ref.update({
+                        'logo_url': logo_url,
+                        'updated_at': firestore.SERVER_TIMESTAMP
+                    })
+                else:
+                    site_settings_ref.set({
+                        'logo_url': logo_url,
+                        'updated_at': firestore.SERVER_TIMESTAMP
+                    })
+                
+                messages.success(request, "Logo uploaded successfully!")
+                
+            except Exception as storage_e:
+                print(f"Error uploading logo to Firebase Storage: {storage_e}")
+                messages.error(request, f"Error uploading logo: {str(storage_e)}")
+                
+        except Exception as e:
+            print(f"Error in upload_logo view: {str(e)}")
+            messages.error(request, f"An error occurred: {str(e)}")
+            
+    return redirect('admin_dashboard')
+    
+@admin_required
+def reset_logo(request):
+    """Reset the logo to the default text version"""
+    if request.method == 'POST':
+        try:
+            # Get the site settings document
+            site_settings_ref = db.collection('site_settings').document('general')
+            doc = site_settings_ref.get()
+            
+            if doc.exists:
+                # Remove the logo_url field
+                site_settings_ref.update({
+                    'logo_url': firestore.DELETE_FIELD,
+                    'updated_at': firestore.SERVER_TIMESTAMP
+                })
+                
+            messages.success(request, "Logo reset to text successfully!")
+            
+        except Exception as e:
+            print(f"Error in reset_logo view: {str(e)}")
+            messages.error(request, f"An error occurred: {str(e)}")
+            
+    return redirect('admin_dashboard')

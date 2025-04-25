@@ -54,4 +54,6 @@ urlpatterns = [
     path('get_job_details/<str:job_id>/', admin.get_job_details, name='get_job_details'),
     path('activate_job/<str:job_id>/', admin.activate_job, name='activate_job'),
     path('deactivate_job/<str:job_id>/', admin.deactivate_job, name='deactivate_job'),
+    path('upload_logo/', admin.upload_logo, name='upload_logo'),
+    path('reset_logo/', admin.reset_logo, name='reset_logo'),
 ] + static_url(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

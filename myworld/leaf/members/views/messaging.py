@@ -65,6 +65,15 @@ def messages_page(request):
         return redirect('login_page')
     
     try:
+        # Get site settings for logo
+        site_settings = {}
+        try:
+            site_settings_ref = db.collection('site_settings').document('general').get()
+            if site_settings_ref.exists:
+                site_settings = site_settings_ref.to_dict()
+        except Exception as e:
+            print(f"Error retrieving site settings: {e}")
+        
         messages_ref = db.collection('messages')
         
         # Fetch sent messages
@@ -137,7 +146,8 @@ def messages_page(request):
             'sent_messages': sent_messages,
             'received_messages': received_messages,
             'unread_count': unread_count, # Pass unread count to template
-            'recipients': recipients # Renamed from 'admins' for clarity
+            'recipients': recipients, # Renamed from 'admins' for clarity
+            'site_settings': site_settings # Pass site settings to template
         }
         
         return render(request, 'messages.html', context)

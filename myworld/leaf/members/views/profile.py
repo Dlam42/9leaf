@@ -15,29 +15,30 @@ from .utils import geocode_and_update_user # Import the geocoding function
 
 @is_logged_in
 def dashboard(request):
+    """View for the main user dashboard"""
     user_id = request.session.get("user_id")
-    print(f"Dashboard request received for user_id: {user_id}")
-    
-    if not user_id:
-        print("No user_id in session, redirecting to login")
-        # Should be caught by decorator, but safe fallback
-        return redirect('login_page') 
     
     try:
-        # Get user data from Firestore
+        # Get user data
         user_doc = db.collection('users').document(user_id).get()
-        
         if not user_doc.exists:
-            print(f"No user document found for ID: {user_id}")
-            # User exists in session but not DB? Log out.
+            # User session exists but user data doesn't? Force logout
             request.session.flush()
             messages.error(request, "User data not found. Please log in again.")
             return redirect('login_page')
             
         user_data = user_doc.to_dict()
-        print(f"User data retrieved: {user_data.get('username')}")
         
-        # Get all active jobs to display on the dashboard (exclude 'done' jobs)
+        # Get site settings for logo
+        site_settings = {}
+        try:
+            site_settings_ref = db.collection('site_settings').document('general').get()
+            if site_settings_ref.exists:
+                site_settings = site_settings_ref.to_dict()
+        except Exception as e:
+            print(f"Error retrieving site settings: {e}")
+        
+        # Get active jobs and requests (pending approval becomes job after approval)
         jobs = []
         try:
             # Only fetch jobs with 'active' status - don't show 'done' jobs
@@ -111,7 +112,8 @@ def dashboard(request):
             'jobs': jobs,
             'latitude': latitude,
             'longitude': longitude,
-            'map_markers': map_markers
+            'map_markers': map_markers,
+            'site_settings': site_settings # Pass site settings to template
         })
         
     except Exception as e:
@@ -673,6 +675,15 @@ def job_details(request, job_id):
         job_data = job_doc.to_dict()
         job_data['job_id'] = job_id
         
+        # Get site settings for logo
+        site_settings = {}
+        try:
+            site_settings_ref = db.collection('site_settings').document('general').get()
+            if site_settings_ref.exists:
+                site_settings = site_settings_ref.to_dict()
+        except Exception as e:
+            print(f"Error retrieving site settings: {e}")
+        
         # Check if the user is the job owner or an admin
         is_owner = job_data.get('user_id') == user_id
         can_edit = is_owner or is_admin
@@ -760,7 +771,8 @@ def job_details(request, job_id):
             'is_owner': is_owner,
             'can_edit': can_edit,
             'is_admin': is_admin,
-            'user': user_data  # Add user data to template context
+            'user': user_data,  # Add user data to template context
+            'site_settings': site_settings # Pass site settings to template
         })
         
     except Exception as e:

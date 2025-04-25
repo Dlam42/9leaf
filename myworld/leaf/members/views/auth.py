@@ -136,11 +136,32 @@ def register(request):
             messages.info(request, f"Registration failed: {str(e)}")
             return redirect('register')
 
-    return render(request, "register.html")
+    # Get site settings for logo
+    site_settings = {}
+    try:
+        site_settings_ref = db.collection('site_settings').document('general').get()
+        if site_settings_ref.exists:
+            site_settings = site_settings_ref.to_dict()
+    except Exception as e:
+        print(f"Error retrieving site settings: {e}")
+        
+    return render(request, "register.html", {
+        'site_settings': site_settings
+    })
 
 def login_page(request):
-    template = loader.get_template('login.html')
-    return render(request, "login.html")
+    # Get site settings for logo
+    site_settings = {}
+    try:
+        site_settings_ref = db.collection('site_settings').document('general').get()
+        if site_settings_ref.exists:
+            site_settings = site_settings_ref.to_dict()
+    except Exception as e:
+        print(f"Error retrieving site settings: {e}")
+        
+    return render(request, "login.html", {
+        'site_settings': site_settings
+    })
 
 def login(request):
     if request.method == "POST":
@@ -231,6 +252,15 @@ def change_password(request):
     if not user_id:
         messages.error(request, "User session not found. Please log in again.")
         return redirect('login_page')
+        
+    # Get site settings for logo
+    site_settings = {}
+    try:
+        site_settings_ref = db.collection('site_settings').document('general').get()
+        if site_settings_ref.exists:
+            site_settings = site_settings_ref.to_dict()
+    except Exception as e:
+        print(f"Error retrieving site settings: {e}")
         
     if request.method == "POST":
         current_password = request.POST.get("current_password")
