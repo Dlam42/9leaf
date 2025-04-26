@@ -31,16 +31,14 @@
             text-align: center;
         }
         .logo {
-            font-size: 4em;
             font-weight: bold;
-            color: #2e8b57;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            letter-spacing: 2px;
+            letter-spacing: 4cap;
         }
         .slogan {
             font-size: 1.3em;
             color: #333;
-            margin-top: 15px;
+            margin-top: 5px;
             font-weight: 500;
         }
         .form-container {
@@ -167,7 +165,13 @@
 <body>
     <div class="container">
         <div class="logo-section">
-            <img src="logo.png" alt="Profile">
+            {% if site_settings.logo_url %}
+                <div class="logo">
+                    <img src="{{ site_settings.logo_url }}" alt="Leaf Logo" style="max-width: 500px; max-height: 300px;">
+                </div>
+            {% else %}
+                <div class="logo">Leaf</div>
+            {% endif %}
             <div class="slogan">YOUR GARDEN, YOUR WAY<br>FAST, EASY, NEARBY!</div>
         </div>
         <div class="form-container">
@@ -179,7 +183,7 @@
                 <button type="submit">Sign In</button>
                 <div class="remember">
                     <label><input type="checkbox"> Remember Me</label>
-                    <a href="#">Forgot Password</a>
+                    <a href="{% url 'change_password' %}">Forgot Password</a>
                 </div>
             </form>
             <a href="{% url 'register' %}" class="register-btn">Register</a>
