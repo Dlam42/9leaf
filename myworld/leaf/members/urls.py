@@ -22,7 +22,7 @@ urlpatterns = [
     path('login/', auth.login, name="login_user"),
     path('login_page/', auth.login_page, name="login_page"),
     path('logout/', auth.logout, name="logout"),
-
+    
     # Profile views
     path('dashboard/', profile.dashboard, name="dashboard"),
     path('upload_profile_image/', profile.upload_profile_image, name='upload_profile_image'),
