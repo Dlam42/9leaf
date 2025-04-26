@@ -24,7 +24,7 @@ This project is a Django web application that includes:
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd leaf
+cd myworld
 ```
 
 2. Activate the virtual environment:
@@ -34,7 +34,7 @@ cd leaf
      ```
    - On Windows:
      ```bash
-     myworld\Scripts\activate
+     myworld\bin\activate
      ```
 
 3. Install the required packages:
