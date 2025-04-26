@@ -157,7 +157,13 @@
 <body>
     <div class="container">
         <div class="logo-section">
-            <img src="logo.png" alt="Profile">
+            {% if site_settings.logo_url %}
+                 <div class="logo">
+                     <img src="{{ site_settings.logo_url }}" alt="Leaf Logo" style="max-width: 300px; max-height: 150px;">
+                 </div>
+             {% else %}
+                 <div class="logo">Leaf</div>
+             {% endif %}
             <div class="slogan">YOUR GARDEN, YOUR WAY<br>FAST, EASY, NEARBY!</div>
         </div>
         <div class="form-container">
