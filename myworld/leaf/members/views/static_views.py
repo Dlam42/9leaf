@@ -15,7 +15,7 @@ def members(request):
             site_settings = site_settings_ref.to_dict()
     except Exception as e:
         print(f"Error retrieving site settings: {e}")
-        
+         
     return render(request, "members_page.html", {
         'site_settings': site_settings
     })
@@ -61,7 +61,7 @@ def my_account(request):
             return redirect('login_page')
             
         user_data = user_doc.to_dict()
-        
+
         # Get site settings for logo
         site_settings = {}
         try:
