@@ -55,8 +55,8 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
             position: absolute;
             right: 20px;
-            top: 10px;
-            width: 340px;
+            top: 20px;
+            width: 240px;
         }
         .profile-info {
             display: flex;
@@ -78,9 +78,6 @@
         }
         #profile-img-display:hover {
             transform: scale(1.05);
-        }
-        .ratings {
-            text-align: center;
         }
         .account-actions {
             display: flex;
@@ -316,12 +313,6 @@
                 <div class="profile-info">
                     <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" id="profile-img-display">
                     <div>{{ user.username }}</div>
-                </div>
-                <div>
-                    <div class="ratings">
-                        <div style="color: gold;">★★★★★</div>
-                        <div style="color: black;">★★★★☆</div>
-                    </div>
                 </div>
                 <div class="account-actions">
                     {% if request.session.is_admin %}
