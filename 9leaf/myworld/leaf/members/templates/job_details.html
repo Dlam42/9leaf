@@ -1,0 +1,733 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details - {{ job.job_title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #8fd3e8;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: relative;
+        }
+        .logo {
+            font-size: 44px;
+            font-weight: bold;
+            color: #2e8b57;
+            position: absolute;
+            left: 20px;
+            top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 1px;
+        }
+        .page-title {
+            font-size: 44px;
+            font-weight: 600;
+            font-family: 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #2e8b57;
+            margin-top: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .profile-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #F8E6A0;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 240px;
+        }
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-right: 20px;
+        }
+        #profile-img-display {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        #profile-img-display:hover {
+            transform: scale(1.05);
+        }
+        .account-actions {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+            font-size: 14px;
+        }
+        .account-actions a {
+            margin: 3px 0;
+            color: #2e8b57;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .account-actions a:hover {
+            color: #1b5233;
+            transform: translateY(-1px);
+        }
+        .content {
+            padding: 100px 20px 50px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .section-box {
+            background-color: #F8E6A0;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2e8b57;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8c144;
+        }
+        .job-info {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .job-info dt {
+            font-weight: bold;
+            color: #2e8b57;
+        }
+        .job-info dd {
+            margin-left: 0;
+        }
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #2e8b57, #3aa76d);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #267349, #2e8b57);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 139, 87, 0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(to right, #c0392b, #a82315);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #7f8c8d, #6c7879);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+        }
+        .status-label {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }
+        .status-pending {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            border: 1px solid #faebcc;
+        }
+        .status-approved, .status-active {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .status-rejected, .status-canceled {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .status-completed, .status-done {
+            background-color: #d9edf7;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+        }
+        .edit-form {
+            margin-top: 30px;
+            display: none;
+        }
+        .edit-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2e8b57;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .price-input-container {
+            position: relative;
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .price-input-container:before {
+            content: '$';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            font-weight: bold;
+            color: #2e8b57;
+            z-index: 5;
+        }
+        .price-input {
+            padding-left: 28px !important;
+        }
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2%;
+            margin-bottom: 15px;
+        }
+        .input-row .form-group {
+            flex: 1;
+            min-width: 30%;
+        }
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirmation-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+        }
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .workers-section {
+            margin-top: 30px;
+        }
+        .worker-list {
+            margin-top: 15px;
+        }
+        .worker-item {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .form-section {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            padding-top: 20px;
+        }
+        .form-title {
+            color: #2e8b57;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 900px) {
+            .content {
+                padding-top: 120px;
+            }
+            .profile-box {
+                position: relative;
+                width: 90%;
+                margin: 15px auto;
+                right: auto;
+            }
+            .page-title {
+                position: relative;
+                left: auto;
+                transform: none;
+                margin: 70px auto 0;
+                text-align: center;
+                width: 100%;
+            }
+            .top-bar {
+                flex-direction: column;
+                height: auto;
+            }
+            .job-info {
+                grid-template-columns: 1fr;
+            }
+            .btn-container {
+                flex-direction: column;
+            }
+            .input-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        {% if site_settings.logo_url %}
+        <div class="logo">
+            <img src="{{ site_settings.logo_url }}" alt="Leaf Logo" style="max-width: 150px; max-height: 60px;">
+        </div>
+        {% else %}
+            <div class="logo">Leaf</div>
+        {% endif %}
+        <div class="page-title">Job Details</div>
+        <div class="profile-box">
+            <div class="profile-info">
+                <img src="{{ user.profile_image_url|default:'/static/default_profile.png' }}" alt="Profile" id="profile-img-display">
+                <div>{{ user.username }}</div>
+            </div>
+            <div class="account-actions">
+                {% if request.session.is_admin %}
+                <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                {% endif %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'my_account' %}">My Account</a>
+                <a href="{% url 'logout' %}">Sign Out</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        {% if messages %}
+        <div class="section-box" style="padding: 15px; margin-bottom: 20px;">
+            <ul style="margin: 0; padding: 0; list-style: none;">
+                {% for message in messages %}
+                <li {% if message.tags %}class="{{ message.tags }}"{% endif %} style="padding: 8px; margin-bottom: 5px; border-radius: 5px; background-color: #d9edf7;">
+                    {{ message }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="section-box">
+            <h2>{{ job.job_title }}</h2>
+            
+            <div class="job-info">
+                <dt>Job Number:</dt>
+                <dd>{{ job.job_number|default:"N/A" }}</dd>
+                
+                <dt>Status:</dt>
+                <dd><span class="status-label status-{{ job.status|lower }}">{{ job.status|title }}</span></dd>
+                
+                <dt>Price:</dt>
+                <dd>${{ job.price }}</dd>
+                
+                <dt>Location:</dt>
+                <dd>
+                    {% if job.city and job.state %}
+                        {{ job.address }}, {{ job.city }}, {{ job.state }} {{ job.zip_code }}
+                        {% if job.unit_apt_num %}
+                            Unit {{ job.unit_apt_num }}
+                        {% endif %}
+                    {% else %}
+                        Not specified
+                    {% endif %}
+                </dd>
+                
+                <dt>Start Time:</dt>
+                <dd>{{ job.start_time|default:"Not specified" }}</dd>
+                
+                <dt>Duration:</dt>
+                <dd>{{ job.duration|default:"Not specified" }}</dd>
+                
+                <dt>People Needed:</dt>
+                <dd>{{ job.people_amount|default:"Not specified" }}</dd>
+                
+                <dt>Tools Needed:</dt>
+                <dd>{{ job.tool|default:"Not specified" }}</dd>
+                
+                <dt>Type:</dt>
+                <dd>{{ job.personal_business|default:"Not specified" }}</dd>
+                
+                <dt>Size:</dt>
+                <dd>{{ job.job_size|default:"Not specified" }}</dd>
+                
+                <dt>Description:</dt>
+                <dd>{{ job.description|default:"No description provided." }}</dd>
+                
+                {% if not is_owner %}
+                <dt>Posted By:</dt>
+                <dd>{{ job.client_name|default:"Unknown" }}</dd>
+                {% endif %}
+                
+                {% if job.created_at %}
+                <dt>Posted On:</dt>
+                <dd>{{ job.created_at }}</dd>
+                {% endif %}
+            </div>
+            
+            {% if can_edit and job.status == 'active' %}
+            <div class="btn-container">
+                <button class="btn btn-primary" id="edit-btn">Edit Job</button>
+                <button class="btn btn-danger" id="cancel-btn">Cancel Job</button>
+            </div>
+            
+            <form method="POST" class="edit-form" id="edit-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit">
+                
+                <div class="form-group">
+                    <label for="job_title" class="required">Job Title</label>
+                    <input type="text" id="job_title" name="job_title" value="{{ job.job_title }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description" class="required">Job Description</label>
+                    <textarea id="description" name="description" required>{{ job.description }}</textarea>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-title">Location</h3>
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="address" class="required">Address</label>
+                            <input type="text" id="address" name="address" value="{{ job.address }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="city" class="required">City</label>
+                            <input type="text" id="city" name="city" value="{{ job.city }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="state" class="required">State</label>
+                            <select id="state" name="state" required>
+                                <option value="">Select State</option>
+                                <option {% if job.state == "Alabama" %}selected{% endif %}>Alabama</option>
+                                <option {% if job.state == "Alaska" %}selected{% endif %}>Alaska</option>
+                                <option {% if job.state == "Arizona" %}selected{% endif %}>Arizona</option>
+                                <option {% if job.state == "Arkansas" %}selected{% endif %}>Arkansas</option>
+                                <option {% if job.state == "California" %}selected{% endif %}>California</option>
+                                <option {% if job.state == "Colorado" %}selected{% endif %}>Colorado</option>
+                                <option {% if job.state == "Connecticut" %}selected{% endif %}>Connecticut</option>
+                                <option {% if job.state == "Delaware" %}selected{% endif %}>Delaware</option>
+                                <option {% if job.state == "Florida" %}selected{% endif %}>Florida</option>
+                                <option {% if job.state == "Georgia" %}selected{% endif %}>Georgia</option>
+                                <option {% if job.state == "Hawaii" %}selected{% endif %}>Hawaii</option>
+                                <option {% if job.state == "Idaho" %}selected{% endif %}>Idaho</option>
+                                <option {% if job.state == "Illinois" %}selected{% endif %}>Illinois</option>
+                                <option {% if job.state == "Indiana" %}selected{% endif %}>Indiana</option>
+                                <option {% if job.state == "Iowa" %}selected{% endif %}>Iowa</option>
+                                <option {% if job.state == "Kansas" %}selected{% endif %}>Kansas</option>
+                                <option {% if job.state == "Kentucky" %}selected{% endif %}>Kentucky</option>
+                                <option {% if job.state == "Louisiana" %}selected{% endif %}>Louisiana</option>
+                                <option {% if job.state == "Maine" %}selected{% endif %}>Maine</option>
+                                <option {% if job.state == "Maryland" %}selected{% endif %}>Maryland</option>
+                                <option {% if job.state == "Massachusetts" %}selected{% endif %}>Massachusetts</option>
+                                <option {% if job.state == "Michigan" %}selected{% endif %}>Michigan</option>
+                                <option {% if job.state == "Minnesota" %}selected{% endif %}>Minnesota</option>
+                                <option {% if job.state == "Mississippi" %}selected{% endif %}>Mississippi</option>
+                                <option {% if job.state == "Missouri" %}selected{% endif %}>Missouri</option>
+                                <option {% if job.state == "Montana" %}selected{% endif %}>Montana</option>
+                                <option {% if job.state == "Nebraska" %}selected{% endif %}>Nebraska</option>
+                                <option {% if job.state == "Nevada" %}selected{% endif %}>Nevada</option>
+                                <option {% if job.state == "New Hampshire" %}selected{% endif %}>New Hampshire</option>
+                                <option {% if job.state == "New Jersey" %}selected{% endif %}>New Jersey</option>
+                                <option {% if job.state == "New Mexico" %}selected{% endif %}>New Mexico</option>
+                                <option {% if job.state == "New York" %}selected{% endif %}>New York</option>
+                                <option {% if job.state == "North Carolina" %}selected{% endif %}>North Carolina</option>
+                                <option {% if job.state == "North Dakota" %}selected{% endif %}>North Dakota</option>
+                                <option {% if job.state == "Ohio" %}selected{% endif %}>Ohio</option>
+                                <option {% if job.state == "Oklahoma" %}selected{% endif %}>Oklahoma</option>
+                                <option {% if job.state == "Oregon" %}selected{% endif %}>Oregon</option>
+                                <option {% if job.state == "Pennsylvania" %}selected{% endif %}>Pennsylvania</option>
+                                <option {% if job.state == "Rhode Island" %}selected{% endif %}>Rhode Island</option>
+                                <option {% if job.state == "South Carolina" %}selected{% endif %}>South Carolina</option>
+                                <option {% if job.state == "South Dakota" %}selected{% endif %}>South Dakota</option>
+                                <option {% if job.state == "Tennessee" %}selected{% endif %}>Tennessee</option>
+                                <option {% if job.state == "Texas" %}selected{% endif %}>Texas</option>
+                                <option {% if job.state == "Utah" %}selected{% endif %}>Utah</option>
+                                <option {% if job.state == "Vermont" %}selected{% endif %}>Vermont</option>
+                                <option {% if job.state == "Virginia" %}selected{% endif %}>Virginia</option>
+                                <option {% if job.state == "Washington" %}selected{% endif %}>Washington</option>
+                                <option {% if job.state == "West Virginia" %}selected{% endif %}>West Virginia</option>
+                                <option {% if job.state == "Wisconsin" %}selected{% endif %}>Wisconsin</option>
+                                <option {% if job.state == "Wyoming" %}selected{% endif %}>Wyoming</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="unit_apt_num">Unit/Apt Number</label>
+                            <input type="text" id="unit_apt_num" name="unit_apt_num" value="{{ job.unit_apt_num }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="zip_code" class="required">Zip Code</label>
+                            <input type="text" id="zip_code" name="zip_code" value="{{ job.zip_code }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="form-title">Job Details</h3>
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="tools" class="required">Tools Needed</label>
+                            <select id="tools" name="tools" required>
+                                <option value="">Tool / No Tool</option>
+                                <option {% if job.tool == "Tool" %}selected{% endif %}>Tool</option>
+                                <option {% if job.tool == "No Tool" %}selected{% endif %}>No Tool</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duration" class="required">Duration</label>
+                            <select id="duration" name="duration" required>
+                                <option value="">Select Duration</option>
+                                <option {% if job.duration == "30 mins" %}selected{% endif %}>30 mins</option>
+                                <option {% if job.duration == "1 hour" %}selected{% endif %}>1 hour</option>
+                                <option {% if job.duration == "1 hour 30 mins" %}selected{% endif %}>1 hour 30 mins</option>
+                                <option {% if job.duration == "2 hours" %}selected{% endif %}>2 hours</option>
+                                <option {% if job.duration == "2 hours 30 mins" %}selected{% endif %}>2 hours 30 mins</option>
+                                <option {% if job.duration == "3 hours" %}selected{% endif %}>3 hours</option>
+                                <option {% if job.duration == "3 hours 30 mins" %}selected{% endif %}>3 hours 30 mins</option>
+                                <option {% if job.duration == "4 hours" %}selected{% endif %}>4 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="start_time" class="required">Start Time</label>
+                        <input type="text" id="start_time" name="start_time" value="{{ job.start_time }}" required>
+                        <small>Format: YYYY-MM-DD HH:MM (e.g., 2025-04-19 14:30)</small>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="personal_business" class="required">Type</label>
+                            <select id="personal_business" name="personal_business" required>
+                                <option value="">Personal / Business</option>
+                                <option {% if job.personal_business == "Personal" %}selected{% endif %}>Personal</option>
+                                <option {% if job.personal_business == "Business" %}selected{% endif %}>Business</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sizes" class="required">Size</label>
+                            <select id="sizes" name="sizes" required>
+                                <option value="">Select Size</option>
+                                <option {% if job.job_size == "Small" %}selected{% endif %}>Small</option>
+                                <option {% if job.job_size == "Medium" %}selected{% endif %}>Medium</option>
+                                <option {% if job.job_size == "Large" %}selected{% endif %}>Large</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="amt_people" class="required">Number of People</label>
+                            <select id="amt_people" name="amt_people" required>
+                                <option value="">Number of People</option>
+                                <option {% if job.people_amount == "1" %}selected{% endif %}>1</option>
+                                <option {% if job.people_amount == "2" %}selected{% endif %}>2</option>
+                                <option {% if job.people_amount == "3" %}selected{% endif %}>3</option>
+                                <option {% if job.people_amount == "4" %}selected{% endif %}>4</option>
+                                <option {% if job.people_amount == "5" %}selected{% endif %}>5</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="price" class="required">Price ($)</label>
+                        <div class="price-input-container">
+                            <input type="number" id="price" name="price" class="price-input" value="{{ job.price }}" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+                </div>
+            </form>
+            {% endif %}
+            
+            {% if job.status == 'active' and job.accepted_workers and job.accepted_workers|length > 0 %}
+            <div class="workers-section">
+                <h3>Assigned Workers</h3>
+                <div class="worker-list">
+                    {% for worker in job.worker_names %}
+                    <div class="worker-item">
+                        <strong>{{ worker.name }}</strong>
+                        {% if worker.id == job.worker_id %}
+                        <span style="font-size: 12px; margin-left: 10px; color: #3c763d;">(Primary Worker)</span>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p>No workers have been assigned yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="btn-container" style="justify-content: center;">
+            <a href="{% url 'my_account' %}" class="btn btn-secondary">Back to My Account</a>
+        </div>
+    </div>
+
+    <!-- Confirmation dialog for canceling job -->
+    <div class="confirmation-dialog" id="cancel-confirmation">
+        <div class="confirmation-content">
+            <h3>Cancel Job</h3>
+            <p>Are you sure you want to cancel this job? This action cannot be undone.</p>
+            <div class="confirmation-buttons">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel">
+                    <button type="submit" class="btn btn-danger">Yes, Cancel Job</button>
+                </form>
+                <button class="btn btn-secondary" id="cancel-confirmation-close">No, Keep Job</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editBtn = document.getElementById('edit-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const editForm = document.getElementById('edit-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const cancelConfirmation = document.getElementById('cancel-confirmation');
+            const cancelConfirmationClose = document.getElementById('cancel-confirmation-close');
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    editForm.classList.add('active');
+                });
+            }
+            
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', function() {
+                    editForm.classList.remove('active');
+                });
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    cancelConfirmation.style.display = 'flex';
+                });
+            }
+            
+            if (cancelConfirmationClose) {
+                cancelConfirmationClose.addEventListener('click', function() {
+                    cancelConfirmation.style.display = 'none';
+                });
+            }
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === cancelConfirmation) {
+                    cancelConfirmation.style.display = 'none';
+                }
+            });
+            
+            // Form validation
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    let requiredFields = this.querySelectorAll('[required]');
+                    let valid = true;
+                    
+                    requiredFields.forEach(function(field) {
+                        if (!field.value.trim()) {
+                            field.style.borderColor = 'red';
+                            valid = false;
+                        } else {
+                            field.style.borderColor = '#ddd';
+                        }
+                    });
+                    
+                    if (!valid) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
