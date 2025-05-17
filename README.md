@@ -1,4 +1,4 @@
-# 7_leaf Django Application
+# 9leaf Django Application
 
 A Django web application with user authentication, messaging, and location-based features.
 
